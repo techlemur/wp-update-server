@@ -185,6 +185,29 @@ class Wpup_UpdateServer {
 		if ( $request->action === 'get_metadata' ) {
 			$this->actionGetMetadata($request);
 		} else if ( $request->action === 'download' ) {
+			
+			$package = $request->package;
+			$slug = $package->slug;
+			
+			include(__DIR__ . '/../../keys.php');
+			
+			if(array_key_exists($slug,$licenses)){
+				//error_log("going");
+				//error_log($request->key);
+				//error_log( print_r( $package, true ) );
+				if(empty($request->key)){
+					//error_log("MISSING KEY");
+					$this->exitWithError(sprintf('Missing Key'), 401);
+				}else if(in_array($request->key,$licenses[$slug])){
+					//error_log("GOOOOOOOD!");
+					$this->actionDownload($request);
+				}else{
+					//error_log("BAD KEY");
+					$this->exitWithError(sprintf('Invalid Key "%s".', htmlentities($request->key)), 401);
+				}
+				
+			}
+			
 			$this->actionDownload($request);
 		} else {
 			$this->exitWithError(sprintf('Invalid action "%s".', htmlentities($request->action)), 400);
@@ -199,6 +222,10 @@ class Wpup_UpdateServer {
 	protected function actionGetMetadata(Wpup_Request $request) {
 		$meta = $request->package->getMetadata();
 		$meta['download_url'] = $this->generateDownloadUrl($request->package);
+		//error_log('-----------------actionGetMetadata----------------------');
+		if(!empty($request->key)){
+			$meta['download_url'] .= '&key='.$request->key;
+		}
 		$meta['banners'] = $this->getBanners($request->package);
 		$meta['icons'] = $this->getIcons($request->package);
 

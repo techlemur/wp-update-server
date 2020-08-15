@@ -11,6 +11,8 @@ class Wpup_Request {
 	public $httpMethod;
 	/** @var string The name of the current action. For example, "get_metadata". */
 	public $action;
+	/** @var string The download key. For example, "get_metadata". */
+	public $key;
 	/** @var string Plugin or theme slug from the current request. */
 	public $slug;
 	/** @var Wpup_Package The package that matches the current slug, if any. */
@@ -31,6 +33,7 @@ class Wpup_Request {
 		$this->httpMethod = strtoupper($httpMethod);
 
 		$this->action = preg_replace('@[^a-z0-9\-_]@i', '', $this->param('action', ''));
+		$this->key = preg_replace('@[^a-z0-9\-_]@i', '', $this->param('key', ''));
 		$this->slug = preg_replace('@[:?/\\\]@i', '', $this->param('slug', ''));
 
 		//If the request was made via the WordPress HTTP API we can usually
